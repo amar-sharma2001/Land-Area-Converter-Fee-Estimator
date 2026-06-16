@@ -1,0 +1,1649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>India Land Converter & Fee Estimator – All States</title>
+<style>
+/* ─── RESET ──────────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ─── DESIGN TOKENS ──────────────────────────────────────────────────────── */
+:root {
+  --bg:        #F1EBD9;
+  --surface:   #FFFFFF;
+  --surface-2: #FAF9F5;
+
+  /* Primary: deep forest teal */
+  --p900: #052D1E;
+  --p700: #0B5C42;
+  --p500: #178F63;
+  --p300: #56B898;
+  --p100: #BBEAD9;
+  --p50:  #E4F5EE;
+
+  /* Accent: saffron / gold (India flag reference) */
+  --a700: #8B4500;
+  --a500: #BC7810;
+  --a300: #DFA030;
+  --a100: #F1D798;
+  --a50:  #FBF1DB;
+
+  /* Neutrals */
+  --n900: #1A1914;
+  --n700: #3D3C35;
+  --n500: #6A6960;
+  --n400: #8A8980;
+  --n300: #ACACAA;
+  --n200: #D0CEC4;
+  --n100: #E3E1D7;
+  --n50:  #F2F0E8;
+
+  --border:   #DDD9CE;
+  --r-sm:     8px;
+  --r-md:     13px;
+  --r-lg:     18px;
+  --sh-sm:    0 1px 3px rgba(0,0,0,.05), 0 4px 14px rgba(0,0,0,.04);
+  --sh:       0 2px 8px rgba(0,0,0,.07), 0 10px 28px rgba(0,0,0,.06);
+  --sh-lg:    0 4px 18px rgba(0,0,0,.09), 0 18px 48px rgba(0,0,0,.07);
+  --ease:     0.18s ease;
+}
+
+/* ─── BASE ───────────────────────────────────────────────────────────────── */
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--n900);
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* ─── HEADER ─────────────────────────────────────────────────────────────── */
+.page-header {
+  background: linear-gradient(145deg, #041E14 0%, var(--p900) 30%, #0D6E4E 70%, var(--p500) 100%);
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Subtle dot-grid texture — evokes graph paper / survey maps */
+.page-header::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle, rgba(255,255,255,.07) 1px, transparent 1px);
+  background-size: 26px 26px;
+  pointer-events: none;
+}
+
+/* Bottom accent bar in saffron */
+.page-header::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--a500), var(--a300), var(--a500));
+}
+
+.header-inner {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 30px 28px 28px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  position: relative;
+}
+
+.header-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(255,255,255,.10);
+  border: 1px solid rgba(255,255,255,.18);
+  border-radius: 20px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .9px;
+  text-transform: uppercase;
+  padding: 4px 11px;
+  margin-bottom: 10px;
+  color: var(--p100);
+}
+
+.header-left h1 {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -.3px;
+  color: #fff;
+  margin-bottom: 7px;
+  line-height: 1.2;
+}
+
+.header-left p {
+  font-size: 12px;
+  color: rgba(255,255,255,.52);
+  max-width: 480px;
+  line-height: 1.6;
+}
+
+.header-right {
+  text-align: right;
+  flex-shrink: 0;
+  padding-top: 4px;
+}
+
+.header-right .state-name {
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -.2px;
+}
+
+.header-right .state-region {
+  font-size: 11px;
+  color: rgba(255,255,255,.42);
+  margin-top: 4px;
+}
+
+/* ─── MAIN ───────────────────────────────────────────────────────────────── */
+.main {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 24px 20px 64px;
+}
+
+/* ─── SHARED CARD BASE ───────────────────────────────────────────────────── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  box-shadow: var(--sh-sm);
+  margin-bottom: 14px;
+}
+
+/* ─── SECTION LABEL ──────────────────────────────────────────────────────── */
+.section-label {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: .9px;
+  text-transform: uppercase;
+  color: var(--n400);
+  margin-bottom: 10px;
+}
+
+/* ─── FORM ELEMENTS ──────────────────────────────────────────────────────── */
+.field-label {
+  display: block;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: .65px;
+  text-transform: uppercase;
+  color: var(--n500);
+  margin-bottom: 7px;
+}
+
+input[type=number],
+select {
+  width: 100%;
+  padding: 10px 13px;
+  border: 1.5px solid var(--n200);
+  border-radius: var(--r-sm);
+  font-size: 14.5px;
+  font-family: inherit;
+  color: var(--n900);
+  background: var(--surface);
+  -webkit-appearance: none;
+  appearance: none;
+  transition: border-color var(--ease), box-shadow var(--ease), background var(--ease);
+}
+
+input[type=number]:hover,
+select:hover {
+  border-color: var(--n300);
+}
+
+input[type=number]:focus,
+select:focus {
+  outline: none;
+  border-color: var(--p500);
+  box-shadow: 0 0 0 3px rgba(23,143,99,.13);
+  background: #fff;
+}
+
+input[type=number]::placeholder { color: var(--n300); }
+
+select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238A8980' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 13px center;
+  padding-right: 34px;
+  cursor: pointer;
+}
+
+/* ─── STATE CARD ─────────────────────────────────────────────────────────── */
+.state-card { padding: 20px 22px; }
+
+.state-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  align-items: end;
+}
+
+@media (max-width: 580px) { .state-grid { grid-template-columns: 1fr; } }
+
+#stateDesc {
+  font-size: 11.5px;
+  color: var(--n400);
+  margin-top: 8px;
+  line-height: 1.55;
+}
+
+/* ─── INPUT CARD ─────────────────────────────────────────────────────────── */
+.input-card { padding: 20px 22px; }
+
+.input-row {
+  display: grid;
+  grid-template-columns: 2fr 2fr 1fr;
+  gap: 14px;
+  align-items: end;
+}
+
+@media (max-width: 680px) { .input-row { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 440px) { .input-row { grid-template-columns: 1fr; } }
+
+.units-strip {
+  display: none;
+  align-items: flex-start;
+  gap: 8px;
+  background: var(--p50);
+  border: 1px solid var(--p100);
+  border-radius: var(--r-sm);
+  padding: 10px 14px;
+  margin-top: 14px;
+  font-size: 11.5px;
+  color: var(--p700);
+  line-height: 1.55;
+}
+
+.units-strip strong { color: var(--p900); font-weight: 600; }
+
+/* ─── RESULTS GRID ───────────────────────────────────────────────────────── */
+.results-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+@media (max-width: 800px) { .results-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 480px) { .results-grid { grid-template-columns: repeat(2, 1fr); } }
+
+/* ─── METRIC CARDS ───────────────────────────────────────────────────────── */
+.metric-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 14px 15px;
+  position: relative;
+  overflow: hidden;
+  cursor: default;
+  transition: border-color var(--ease), box-shadow var(--ease), transform var(--ease);
+}
+
+/* Animated top accent */
+.metric-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--p500), var(--p300));
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform .22s ease;
+  border-radius: 0 0 2px 2px;
+}
+
+.metric-card:hover {
+  border-color: var(--p100);
+  box-shadow: var(--sh);
+  transform: translateY(-2px);
+}
+
+.metric-card:hover::before { transform: scaleX(1); }
+
+.m-unit {
+  font-size: 9.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .6px;
+  color: var(--n400);
+  margin-bottom: 6px;
+}
+
+.m-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--p700);
+  line-height: 1.1;
+  word-break: break-all;
+  transition: color .15s;
+}
+
+.m-sub {
+  font-size: 10px;
+  color: var(--n400);
+  margin-top: 3px;
+}
+
+.metric-card.updated .m-value { color: var(--p500); }
+
+/* ─── LOCAL UNITS SECTION ────────────────────────────────────────────────── */
+#localUnitsSection { margin-bottom: 14px; }
+
+/* ─── TWO-PANEL ROW ──────────────────────────────────────────────────────── */
+.panels {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+@media (max-width: 700px) { .panels { grid-template-columns: 1fr; } }
+
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 20px;
+  box-shadow: var(--sh-sm);
+}
+
+.panel-title {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--p700);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding-bottom: 13px;
+  border-bottom: 1px solid var(--n100);
+  letter-spacing: .1px;
+}
+
+.form-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+  margin-bottom: 18px;
+}
+
+/* ─── FEE DISPLAY  ——  signature element: government challan receipt ─────── */
+.fee-display {
+  background: var(--a50);
+  border: 2px dashed var(--a300);
+  border-radius: var(--r-sm);
+  padding: 20px 18px 18px;
+  text-align: center;
+  position: relative;
+}
+
+/* "ESTIMATE" rubber stamp */
+.fee-stamp {
+  position: absolute;
+  top: 9px;
+  right: 10px;
+  font-size: 7.5px;
+  font-weight: 800;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: var(--a500);
+  border: 1.5px solid var(--a300);
+  border-radius: 3px;
+  padding: 2px 5px;
+  opacity: .65;
+  transform: rotate(5deg);
+  line-height: 1.4;
+}
+
+.fee-label {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .9px;
+  text-transform: uppercase;
+  color: var(--a700);
+  margin-bottom: 8px;
+}
+
+.fee-amount {
+  font-size: 34px;
+  font-weight: 800;
+  color: var(--p900);
+  line-height: 1;
+  letter-spacing: -1.5px;
+}
+
+.fee-rate {
+  font-size: 11px;
+  color: var(--p700);
+  margin-top: 9px;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.fee-note {
+  font-size: 10.5px;
+  color: var(--n400);
+  margin-top: 5px;
+}
+
+/* ─── NOTE BOXES ─────────────────────────────────────────────────────────── */
+.note-box {
+  display: flex;
+  gap: 9px;
+  border-radius: var(--r-sm);
+  padding: 11px 13px;
+  font-size: 11.5px;
+  line-height: 1.55;
+  margin-top: 14px;
+}
+
+.note-box svg { flex-shrink: 0; margin-top: 1px; }
+
+.note-box.amber { background: var(--a50);  border: 1px solid var(--a100); color: var(--a700); }
+.note-box.gray  { background: var(--n50);  border: 1px solid var(--n100); color: var(--n500); }
+.note-box.blue  { background: #EBF2FB;     border: 1px solid #BAD4F2;     color: #1A5FA5; }
+
+/* ─── REFERENCE TABLE ────────────────────────────────────────────────────── */
+.ref-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.ref-table thead th {
+  text-align: left;
+  font-size: 9.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  color: var(--n400);
+  padding: 0 6px 9px 0;
+  border-bottom: 1.5px solid var(--n100);
+}
+
+.ref-table tbody td {
+  padding: 8px 6px 8px 0;
+  border-bottom: 1px solid var(--n50);
+  color: var(--n700);
+  vertical-align: middle;
+}
+
+.ref-table tbody tr:last-child td { border-bottom: none; }
+.ref-table .u-name { font-weight: 600; color: var(--p700); }
+.ref-table tbody tr.active-row td { background: var(--p50); }
+.ref-table tbody tr.active-row .u-name { color: var(--p900); }
+
+/* ─── NOTES PANEL ────────────────────────────────────────────────────────── */
+.notes-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 20px 22px;
+  box-shadow: var(--sh-sm);
+}
+
+.notes-panel ul { list-style: none; padding: 0; }
+
+.notes-panel li {
+  padding: 8px 0;
+  border-bottom: 1px solid var(--n50);
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  font-size: 12px;
+  color: var(--n500);
+  line-height: 1.55;
+}
+
+.notes-panel li:last-child { border-bottom: none; padding-bottom: 0; }
+
+.dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--p300);
+  flex-shrink: 0;
+  margin-top: 7px;
+}
+
+/* ─── REGION PILLS ───────────────────────────────────────────────────────── */
+.region-pill {
+  display: inline-block;
+  padding: 3px 9px;
+  font-size: 9.5px;
+  font-weight: 700;
+  border-radius: 10px;
+  text-transform: uppercase;
+  letter-spacing: .4px;
+}
+
+.region-north   { background: #E5EFFD; color: #1152A0; }
+.region-south   { background: #E3F4E7; color: #186A28; }
+.region-east    { background: var(--a50); color: var(--a700); }
+.region-west    { background: #FAE7E3; color: #943520; }
+.region-central { background: var(--n50); color: var(--n500); }
+.region-ne      { background: var(--p50); color: var(--p700); }
+
+/* ─── RESPONSIVE ─────────────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .header-inner  { padding: 20px 16px 18px; }
+  .header-left h1 { font-size: 18px; }
+  .main          { padding: 16px 13px 44px; }
+  .state-card, .input-card, .panel { padding: 15px 14px; }
+  .notes-panel   { padding: 15px 14px; }
+  .fee-amount    { font-size: 27px; }
+  .m-value       { font-size: 17px; }
+  .results-grid  { gap: 8px; }
+  .card          { margin-bottom: 12px; }
+  .metric-card   { padding: 12px 12px; }
+}
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="header-inner">
+    <div class="header-left">
+      <div class="header-badge">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>
+        India · All States &amp; UTs
+      </div>
+      <h1>Land Area Converter &amp; Fee Estimator</h1>
+      <p>State-specific land unit conversions with accurate local multipliers and regulatory fee estimates across all Indian states.</p>
+    </div>
+    <div class="header-right">
+      <div class="state-name" id="hdr-state">Select a state</div>
+      <div class="state-region" id="hdr-region">—</div>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- State selector -->
+  <div class="card state-card">
+    <div class="state-grid">
+      <div>
+        <label class="field-label" for="stateSelect">Select your state / UT</label>
+        <select id="stateSelect" onchange="onStateChange()">
+          <option value="">— Choose a state —</option>
+          <optgroup label="North India">
+            <option value="UP">Uttar Pradesh</option>
+            <option value="Bihar">Bihar</option>
+            <option value="Punjab">Punjab</option>
+            <option value="Haryana">Haryana</option>
+            <option value="Rajasthan">Rajasthan</option>
+            <option value="HP">Himachal Pradesh</option>
+            <option value="Uttarakhand">Uttarakhand</option>
+            <option value="JK">Jammu &amp; Kashmir</option>
+            <option value="Delhi">Delhi (NCT)</option>
+          </optgroup>
+          <optgroup label="East India">
+            <option value="WB">West Bengal</option>
+            <option value="Odisha">Odisha</option>
+            <option value="Jharkhand">Jharkhand</option>
+          </optgroup>
+          <optgroup label="North-East India">
+            <option value="Assam">Assam</option>
+            <option value="Tripura">Tripura</option>
+            <option value="Meghalaya">Meghalaya</option>
+            <option value="Manipur">Manipur</option>
+            <option value="Nagaland">Nagaland</option>
+            <option value="Mizoram">Mizoram</option>
+            <option value="Arunachal">Arunachal Pradesh</option>
+            <option value="Sikkim">Sikkim</option>
+          </optgroup>
+          <optgroup label="South India">
+            <option value="TN">Tamil Nadu</option>
+            <option value="Kerala">Kerala</option>
+            <option value="Karnataka">Karnataka</option>
+            <option value="AP">Andhra Pradesh</option>
+            <option value="Telangana">Telangana</option>
+          </optgroup>
+          <optgroup label="West India">
+            <option value="Maharashtra">Maharashtra</option>
+            <option value="Gujarat">Gujarat</option>
+            <option value="Goa">Goa</option>
+          </optgroup>
+          <optgroup label="Central India">
+            <option value="MP">Madhya Pradesh</option>
+            <option value="CG">Chhattisgarh</option>
+          </optgroup>
+          <optgroup label="UTs &amp; Others">
+            <option value="Chandigarh">Chandigarh</option>
+            <option value="Puducherry">Puducherry</option>
+          </optgroup>
+        </select>
+      </div>
+      <div id="regionTagDiv" style="padding-bottom:2px;">
+        <span id="regionTag" class="region-pill" style="display:none;"></span>
+        <div id="stateDesc"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Input -->
+  <div class="card input-card">
+    <div class="input-row">
+      <div>
+        <label class="field-label" for="inputValue">Area value</label>
+        <input type="number" id="inputValue" value="1" min="0" step="any" placeholder="Enter amount" oninput="calculateAll()">
+      </div>
+      <div>
+        <label class="field-label" for="inputUnit">Input unit</label>
+        <select id="inputUnit" onchange="calculateAll()">
+          <option value="">Select state first</option>
+        </select>
+      </div>
+      <div>
+        <label class="field-label" for="sqftInput">Or enter sq.&nbsp;ft.</label>
+        <input type="number" id="sqftInput" min="0" step="any" placeholder="Sq.ft." oninput="fromSqft()">
+      </div>
+    </div>
+    <div class="units-strip" id="unitsStrip" style="display:none;">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/></svg>
+      <span id="unitsStripText"></span>
+    </div>
+  </div>
+
+  <!-- Area results -->
+  <div class="section-label">Universal area equivalents</div>
+  <div class="results-grid" id="resultsGrid">
+    <div class="metric-card" id="card-sqft">
+      <div class="m-unit">Sq. Feet</div>
+      <div class="m-value" id="r-sqft">—</div>
+      <div class="m-sub">बर्ग फुट / வர்க அடி</div>
+    </div>
+    <div class="metric-card" id="card-sqm">
+      <div class="m-unit">Sq. Metres</div>
+      <div class="m-value" id="r-sqm">—</div>
+      <div class="m-sub">वर्ग मीटर</div>
+    </div>
+    <div class="metric-card" id="card-acre">
+      <div class="m-unit">Acres</div>
+      <div class="m-value" id="r-acre">—</div>
+      <div class="m-sub">एकड़ / ஏக்கர்</div>
+    </div>
+    <div class="metric-card" id="card-hectare">
+      <div class="m-unit">Hectares</div>
+      <div class="m-value" id="r-hectare">—</div>
+      <div class="m-sub">हेक्टेयर</div>
+    </div>
+    <div class="metric-card" id="card-gaj">
+      <div class="m-unit">Gaj / Sq. Yard</div>
+      <div class="m-value" id="r-gaj">—</div>
+      <div class="m-sub">गज</div>
+    </div>
+  </div>
+
+  <!-- Dynamic local unit results -->
+  <div id="localUnitsSection" style="display:none;margin-bottom:14px;">
+    <div class="section-label">Local unit equivalents</div>
+    <div class="results-grid" id="localResultsGrid"></div>
+  </div>
+
+  <!-- Panels -->
+  <div class="panels">
+
+    <!-- Fee panel -->
+    <div class="panel">
+      <div class="panel-title">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--p700)" stroke-width="2" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+        Regulatory Fee Estimator
+      </div>
+      <div class="form-stack">
+        <div>
+          <label class="field-label" for="zoneType">Zone / area type</label>
+          <select id="zoneType" onchange="calculateAll()">
+            <option value="rural">Rural / Village / Gram Panchayat</option>
+            <option value="municipal">Municipal / Urban local body</option>
+            <option value="metro">Metro / Development authority zone</option>
+          </select>
+        </div>
+        <div>
+          <label class="field-label" for="convType">Purpose of conversion</label>
+          <select id="convType" onchange="calculateAll()">
+            <option value="residential">Residential / Homestead</option>
+            <option value="commercial">Commercial / Business</option>
+            <option value="industrial">Industrial / Manufacturing</option>
+            <option value="agricultural">Agricultural (self-use)</option>
+          </select>
+        </div>
+      </div>
+      <div class="fee-display">
+        <div class="fee-stamp">Estimate</div>
+        <div class="fee-label">Estimated Conversion Fee</div>
+        <div class="fee-amount" id="feeDisplay">₹ —</div>
+        <div class="fee-rate" id="rateInfo">Select a state to see rates</div>
+        <div class="fee-note" id="feeNote"></div>
+      </div>
+      <div class="note-box amber">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/></svg>
+        <span>Fee estimates are indicative only. Final assessment depends on circle rate, land category, and local revenue office survey. Always verify with your district sub-registrar.</span>
+      </div>
+    </div>
+
+    <!-- Reference table -->
+    <div class="panel">
+      <div class="panel-title">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--p700)" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        <span id="refTableTitle">Unit reference table</span>
+      </div>
+      <table class="ref-table" id="refTable">
+        <thead>
+          <tr><th>Unit</th><th>Sq.&nbsp;ft.</th><th>Sq.&nbsp;m.</th><th>Acre</th></tr>
+        </thead>
+        <tbody id="refTableBody">
+          <tr><td colspan="4" style="color:var(--n400);font-size:12px;padding:14px 0;">Select a state to see local unit reference.</td></tr>
+        </tbody>
+      </table>
+      <div class="note-box gray" style="margin-top:12px;" id="stateNote">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/></svg>
+        <span>Select a state above to load accurate local unit values.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notes -->
+  <div class="notes-panel">
+    <div class="section-label" style="margin-bottom:12px;">General rules &amp; reminders</div>
+    <ul>
+      <li><span class="dot"></span><span>Agricultural-to-agricultural conversions for personal farming generally attract no conversion fee across most Indian states.</span></li>
+      <li><span class="dot"></span><span>Official legal units in India are Hectare and Square Meter (since 1957), but traditional local units remain in active use in revenue and registration records.</span></li>
+      <li><span class="dot"></span><span>The same unit name (e.g. Bigha, Katha) has different sizes in different states — always verify the local multiplier before any transaction.</span></li>
+      <li><span class="dot"></span><span>Land conversion permission must be obtained from the competent revenue authority before changing land use. Fees vary by state government circulars and are revised periodically.</span></li>
+      <li><span class="dot"></span><span>For accurate stamp duty and registration charges, consult your state's sub-registrar office or official e-registration portal.</span></li>
+    </ul>
+  </div>
+</div>
+
+<script>
+// ─── STATE DATA ─────────────────────────────────────────────────────────────
+// sqftPerUnit: conversion factors — all in sq ft (base unit for calculations)
+// units: array of {key, label, localName} — what units are relevant for this state
+// feePerSqft: {rural, municipal, metro} x {residential, commercial, industrial, agricultural}
+// notes: string with local specifics
+
+const STATES = {
+  WB: {
+    name: "West Bengal",
+    region: "east",
+    regionLabel: "East India",
+    desc: "Uses Cottah, Bigha, Chatak, Decimal system",
+    units: [
+      {key:"cottah",  label:"Cottah / Katha",   local:"কাটা",   sqft:720},
+      {key:"bigha",   label:"Bigha",             local:"বিঘা",   sqft:14400},
+      {key:"chatak",  label:"Chatak",            local:"ছটাক",   sqft:45},
+      {key:"decimal", label:"Decimal / Satak",   local:"শতক",    sqft:435.6},
+      {key:"acre",    label:"Acre",              local:"একর",    sqft:43560},
+    ],
+    refNote:"1 WB Bigha = 20 Cottah = 16 Chatak. Values per WB govt. standard.",
+    fee:{
+      rural:     {residential:10, commercial:40,  industrial:30,  agricultural:0},
+      municipal: {residential:20, commercial:80,  industrial:50,  agricultural:0},
+      metro:     {residential:40, commercial:150, industrial:100, agricultural:0},
+    },
+    feeUnit:"decimal", feeLabel:"per Decimal",
+    portal:"Banglarbhumi",
+  },
+  Bihar: {
+    name: "Bihar",
+    region: "east",
+    regionLabel: "East India",
+    desc: "Uses Katha, Bigha, Dhur, Decimal system (Pucca Bigha)",
+    units: [
+      {key:"katha",   label:"Katha",     local:"कट्ठा",  sqft:1361.25},
+      {key:"bigha",   label:"Bigha",     local:"बीघा",   sqft:27225},
+      {key:"dhur",    label:"Dhur",      local:"धुर",    sqft:68.0625},
+      {key:"decimal", label:"Decimal",   local:"डेसिमल", sqft:435.6},
+      {key:"acre",    label:"Acre",      local:"एकड़",   sqft:43560},
+    ],
+    refNote:"Bihar uses Pucca Bigha: 1 Bigha = 20 Katha = 400 Dhur. 1 Katha = 20 Dhur.",
+    fee:{
+      rural:     {residential:8,  commercial:35,  industrial:25,  agricultural:0},
+      municipal: {residential:18, commercial:70,  industrial:45,  agricultural:0},
+      metro:     {residential:35, commercial:130, industrial:90,  agricultural:0},
+    },
+    feeUnit:"decimal", feeLabel:"per Decimal",
+    portal:"Bihar Bhumi",
+  },
+  Jharkhand: {
+    name: "Jharkhand",
+    region: "east",
+    regionLabel: "East India",
+    desc: "Uses Katha, Dhur, Decimal (similar to Bihar)",
+    units: [
+      {key:"katha",   label:"Katha",   local:"कट्ठा",  sqft:1361.25},
+      {key:"dhur",    label:"Dhur",    local:"धुर",    sqft:68.0625},
+      {key:"decimal", label:"Decimal", local:"डेसिमल", sqft:435.6},
+      {key:"acre",    label:"Acre",    local:"एकड़",   sqft:43560},
+    ],
+    refNote:"Jharkhand follows Bihar-style Pucca measurements. 1 Katha = 20 Dhur.",
+    fee:{
+      rural:     {residential:8,  commercial:30,  industrial:22,  agricultural:0},
+      municipal: {residential:15, commercial:65,  industrial:40,  agricultural:0},
+      metro:     {residential:30, commercial:120, industrial:85,  agricultural:0},
+    },
+    feeUnit:"decimal", feeLabel:"per Decimal",
+    portal:"Jharbhoomi",
+  },
+  Odisha: {
+    name: "Odisha",
+    region: "east",
+    regionLabel: "East India",
+    desc: "Uses Guntha, Decimal, Acre system",
+    units: [
+      {key:"guntha",  label:"Guntha",   local:"ଗୁଣ୍ଠ",   sqft:1089},
+      {key:"decimal", label:"Decimal",  local:"ଡ଼େସିମଲ",  sqft:435.6},
+      {key:"acre",    label:"Acre",     local:"ଏକର",     sqft:43560},
+    ],
+    refNote:"1 Acre = 40 Guntha. Odisha uses Decimal in revenue records.",
+    fee:{
+      rural:     {residential:8,  commercial:30,  industrial:22,  agricultural:0},
+      municipal: {residential:18, commercial:65,  industrial:42,  agricultural:0},
+      metro:     {residential:35, commercial:120, industrial:85,  agricultural:0},
+    },
+    feeUnit:"decimal", feeLabel:"per Decimal",
+    portal:"Bhulekh Odisha",
+  },
+  Assam: {
+    name: "Assam",
+    region: "ne",
+    regionLabel: "North-East India",
+    desc: "Uses Bigha, Katha, Lecha system",
+    units: [
+      {key:"bigha",  label:"Bigha",  local:"বিঘা",  sqft:14400},
+      {key:"katha",  label:"Katha",  local:"কাঠা",  sqft:720},
+      {key:"lecha",  label:"Lecha",  local:"লেচা",  sqft:144},
+      {key:"acre",   label:"Acre",   local:"একৰ",   sqft:43560},
+    ],
+    refNote:"Assam: 1 Bigha = 20 Katha = 100 Lecha (same sqft as WB Bigha).",
+    fee:{
+      rural:     {residential:8,  commercial:30,  industrial:22,  agricultural:0},
+      municipal: {residential:15, commercial:60,  industrial:40,  agricultural:0},
+      metro:     {residential:30, commercial:110, industrial:80,  agricultural:0},
+    },
+    feeUnit:"katha", feeLabel:"per Katha",
+    portal:"Dharitree Assam",
+  },
+  Tripura: {
+    name: "Tripura",
+    region: "ne",
+    regionLabel: "North-East India",
+    desc: "Uses Katha, Decimal, Acre system",
+    units: [
+      {key:"katha",   label:"Katha",   local:"কাঠা",   sqft:720},
+      {key:"decimal", label:"Decimal", local:"ডেসিমাল", sqft:435.6},
+      {key:"acre",    label:"Acre",    local:"একর",    sqft:43560},
+    ],
+    refNote:"Tripura uses similar units to West Bengal and Assam.",
+    fee:{
+      rural:     {residential:8,  commercial:28,  industrial:20,  agricultural:0},
+      municipal: {residential:15, commercial:60,  industrial:38,  agricultural:0},
+      metro:     {residential:25, commercial:100, industrial:70,  agricultural:0},
+    },
+    feeUnit:"decimal", feeLabel:"per Decimal",
+    portal:"Jamabandi Tripura",
+  },
+  Meghalaya:{
+    name:"Meghalaya", region:"ne", regionLabel:"North-East India",
+    desc:"Uses Acre, Square Feet in revenue records",
+    units:[
+      {key:"acre",  label:"Acre",      local:"Acre",  sqft:43560},
+      {key:"sqyd",  label:"Sq. Yard",  local:"Sq Yd", sqft:9},
+    ],
+    refNote:"Meghalaya primarily uses Acre and Square Feet in official records.",
+    fee:{
+      rural:     {residential:5,  commercial:20,  industrial:15,  agricultural:0},
+      municipal: {residential:12, commercial:50,  industrial:30,  agricultural:0},
+      metro:     {residential:22, commercial:85,  industrial:60,  agricultural:0},
+    },
+    feeUnit:"acre", feeLabel:"per Acre",
+    portal:"Meghalaya Land Records",
+  },
+  Manipur:{
+    name:"Manipur", region:"ne", regionLabel:"North-East India",
+    desc:"Uses Acre and Pari system",
+    units:[
+      {key:"acre", label:"Acre", local:"Acre", sqft:43560},
+      {key:"pari", label:"Pari", local:"Pari", sqft:2722.5},
+    ],
+    refNote:"1 Acre = 16 Pari in Manipur traditional system.",
+    fee:{
+      rural:     {residential:5,  commercial:18,  industrial:12,  agricultural:0},
+      municipal: {residential:12, commercial:45,  industrial:28,  agricultural:0},
+      metro:     {residential:20, commercial:80,  industrial:55,  agricultural:0},
+    },
+    feeUnit:"acre", feeLabel:"per Acre",
+    portal:"Manipur Land Records",
+  },
+  Nagaland:{
+    name:"Nagaland", region:"ne", regionLabel:"North-East India",
+    desc:"Uses Acre, Hectare in official records",
+    units:[
+      {key:"acre",    label:"Acre",    local:"Acre",    sqft:43560},
+      {key:"hectare", label:"Hectare", local:"Hectare", sqft:107639},
+    ],
+    refNote:"Nagaland uses Acres in revenue records. Tribal land follows customary law.",
+    fee:{
+      rural:     {residential:5,  commercial:18,  industrial:12,  agricultural:0},
+      municipal: {residential:10, commercial:40,  industrial:25,  agricultural:0},
+      metro:     {residential:18, commercial:70,  industrial:48,  agricultural:0},
+    },
+    feeUnit:"acre", feeLabel:"per Acre",
+    portal:"Nagaland Land Records",
+  },
+  Mizoram:{
+    name:"Mizoram", region:"ne", regionLabel:"North-East India",
+    desc:"Uses Acre and Square Feet in records",
+    units:[
+      {key:"acre", label:"Acre", local:"Acre", sqft:43560},
+      {key:"sqft", label:"Sq. Feet", local:"Sq Ft", sqft:1},
+    ],
+    refNote:"Mizoram uses Acre in official land records. Urban plots often in sq ft.",
+    fee:{
+      rural:     {residential:5,  commercial:18,  industrial:12,  agricultural:0},
+      municipal: {residential:10, commercial:40,  industrial:25,  agricultural:0},
+      metro:     {residential:18, commercial:70,  industrial:48,  agricultural:0},
+    },
+    feeUnit:"acre", feeLabel:"per Acre",
+    portal:"Mizoram Land Records",
+  },
+  Arunachal:{
+    name:"Arunachal Pradesh", region:"ne", regionLabel:"North-East India",
+    desc:"Uses Acre and Hectare in records",
+    units:[
+      {key:"acre",    label:"Acre",    local:"Acre",    sqft:43560},
+      {key:"hectare", label:"Hectare", local:"Hectare", sqft:107639},
+    ],
+    refNote:"Arunachal Pradesh uses Acres in revenue records. Large tracts under tribal reserve forest.",
+    fee:{
+      rural:     {residential:5,  commercial:15,  industrial:10,  agricultural:0},
+      municipal: {residential:10, commercial:38,  industrial:22,  agricultural:0},
+      metro:     {residential:18, commercial:65,  industrial:45,  agricultural:0},
+    },
+    feeUnit:"acre", feeLabel:"per Acre",
+    portal:"Arunachal Land Records",
+  },
+  Sikkim:{
+    name:"Sikkim", region:"ne", regionLabel:"North-East India",
+    desc:"Uses Ropani, Anna, Paisa system",
+    units:[
+      {key:"ropani", label:"Ropani",  local:"Ropani", sqft:5476},
+      {key:"anna",   label:"Anna",    local:"Anna",   sqft:342.25},
+      {key:"paisa",  label:"Paisa",   local:"Paisa",  sqft:85.5625},
+      {key:"acre",   label:"Acre",    local:"Acre",   sqft:43560},
+    ],
+    refNote:"1 Ropani = 16 Anna = 64 Paisa. Sikkim uses Ropani system in hill areas.",
+    fee:{
+      rural:     {residential:6,  commercial:22,  industrial:16,  agricultural:0},
+      municipal: {residential:14, commercial:52,  industrial:34,  agricultural:0},
+      metro:     {residential:25, commercial:95,  industrial:65,  agricultural:0},
+    },
+    feeUnit:"ropani", feeLabel:"per Ropani",
+    portal:"Sikkim Land Records",
+  },
+  UP: {
+    name: "Uttar Pradesh",
+    region: "north",
+    regionLabel: "North India",
+    desc: "Pucca Bigha (E. UP) = 27,225 sq ft; Kachha Bigha (W. UP) = 6,806 sq ft",
+    units: [
+      {key:"bigha_p",  label:"Bigha (Pucca / East UP)",  local:"बीघा पक्का",  sqft:27225},
+      {key:"bigha_k",  label:"Bigha (Kachha / West UP)", local:"बीघा कच्चा",  sqft:6806.25},
+      {key:"biswa",    label:"Biswa",                    local:"बिस्वा",      sqft:1361.25},
+      {key:"biswansi", label:"Biswansi",                 local:"बिस्वांसी",   sqft:68.0625},
+      {key:"acre",     label:"Acre",                     local:"एकड़",        sqft:43560},
+      {key:"sqyd",     label:"Sq. Yard / Gaj",           local:"गज",          sqft:9},
+    ],
+    refNote:"UP has two Bigha sizes. E. UP (Pucca): 1 Bigha = 20 Biswa. W. UP (Kachha): 1 Bigha = 5 Biswa. Always confirm with local patwari.",
+    fee:{
+      rural:     {residential:8,  commercial:35,  industrial:25,  agricultural:0},
+      municipal: {residential:18, commercial:75,  industrial:48,  agricultural:0},
+      metro:     {residential:35, commercial:140, industrial:95,  agricultural:0},
+    },
+    feeUnit:"sqyd", feeLabel:"per Sq. Yard",
+    portal:"Bhulekh UP",
+  },
+  Punjab: {
+    name: "Punjab",
+    region: "north",
+    regionLabel: "North India",
+    desc: "Uses Kanal, Marla, Bigha, Biswa system",
+    units: [
+      {key:"kanal",   label:"Kanal",   local:"ਕਨਾਲ",   sqft:5445},
+      {key:"marla",   label:"Marla",   local:"ਮਰਲਾ",   sqft:272.25},
+      {key:"bigha",   label:"Bigha",   local:"ਬੀਘਾ",   sqft:21780},
+      {key:"biswa",   label:"Biswa",   local:"ਬਿਸਵਾ",  sqft:1089},
+      {key:"acre",    label:"Acre",    local:"ਏਕੜ",    sqft:43560},
+    ],
+    refNote:"Punjab: 1 Acre = 8 Kanal = 160 Marla. 1 Kanal = 20 Marla. 1 Bigha = 4 Kanal.",
+    fee:{
+      rural:     {residential:8,  commercial:32,  industrial:22,  agricultural:0},
+      municipal: {residential:18, commercial:70,  industrial:44,  agricultural:0},
+      metro:     {residential:35, commercial:130, industrial:88,  agricultural:0},
+    },
+    feeUnit:"marla", feeLabel:"per Marla",
+    portal:"PLRS Punjab",
+  },
+  Haryana: {
+    name: "Haryana",
+    region: "north",
+    regionLabel: "North India",
+    desc: "Uses Kanal, Marla, Bigha, Biswa system",
+    units: [
+      {key:"kanal",    label:"Kanal",    local:"कनाल",    sqft:5445},
+      {key:"marla",    label:"Marla",    local:"मरला",    sqft:272.25},
+      {key:"bigha",    label:"Bigha",    local:"बीघा",    sqft:27225},
+      {key:"biswa",    label:"Biswa",    local:"बिस्वा",  sqft:1361.25},
+      {key:"biswansi", label:"Biswansi", local:"बिस्वांसी",sqft:68.0625},
+      {key:"acre",     label:"Acre",     local:"एकड़",    sqft:43560},
+    ],
+    refNote:"Haryana: 1 Bigha = 20 Biswa = 400 Biswansi. 1 Acre ≈ 1.6 Bigha = 8 Kanal = 160 Marla.",
+    fee:{
+      rural:     {residential:8,  commercial:32,  industrial:22,  agricultural:0},
+      municipal: {residential:18, commercial:70,  industrial:44,  agricultural:0},
+      metro:     {residential:35, commercial:130, industrial:88,  agricultural:0},
+    },
+    feeUnit:"marla", feeLabel:"per Marla",
+    portal:"Jamabandi Haryana",
+  },
+  Rajasthan: {
+    name: "Rajasthan",
+    region: "north",
+    regionLabel: "North India",
+    desc: "Uses Bigha (Shahjahani), Biswa, Biswansi, Marla system",
+    units: [
+      {key:"bigha",    label:"Bigha",    local:"बीघा",    sqft:27225},
+      {key:"biswa",    label:"Biswa",    local:"बिस्वा",  sqft:1361.25},
+      {key:"biswansi", label:"Biswansi", local:"बिस्वांसी",sqft:68.0625},
+      {key:"marla",    label:"Marla",    local:"मरला",    sqft:272.25},
+      {key:"acre",     label:"Acre",     local:"एकड़",    sqft:43560},
+    ],
+    refNote:"Rajasthan Bigha (Shahjahani) = 27,225 sq ft. 1 Bigha = 20 Biswa. 1 Biswa = 20 Biswansi.",
+    fee:{
+      rural:     {residential:8,  commercial:30,  industrial:20,  agricultural:0},
+      municipal: {residential:16, commercial:65,  industrial:42,  agricultural:0},
+      metro:     {residential:32, commercial:125, industrial:85,  agricultural:0},
+    },
+    feeUnit:"sqyd", feeLabel:"per Sq. Yard",
+    portal:"Apna Khata Rajasthan",
+  },
+  HP: {
+    name: "Himachal Pradesh",
+    region: "north",
+    regionLabel: "North India",
+    desc: "Uses Bigha, Biswa, Biswansi (smaller Bigha = 10,890 sq ft)",
+    units: [
+      {key:"bigha",    label:"Bigha",    local:"बीघा",    sqft:10890},
+      {key:"biswa",    label:"Biswa",    local:"बिस्वा",  sqft:544.5},
+      {key:"biswansi", label:"Biswansi", local:"बिस्वांसी",sqft:27.225},
+      {key:"kanal",    label:"Kanal",    local:"कनाल",    sqft:5445},
+      {key:"marla",    label:"Marla",    local:"मरला",    sqft:272.25},
+      {key:"acre",     label:"Acre",     local:"एकड़",    sqft:43560},
+    ],
+    refNote:"HP Bigha = 10,890 sq ft (smaller than UP/Bihar). 1 Bigha = 20 Biswa = 4 Kanal.",
+    fee:{
+      rural:     {residential:7,  commercial:28,  industrial:18,  agricultural:0},
+      municipal: {residential:15, commercial:60,  industrial:38,  agricultural:0},
+      metro:     {residential:28, commercial:110, industrial:75,  agricultural:0},
+    },
+    feeUnit:"biswa", feeLabel:"per Biswa",
+    portal:"Himachal Bhulekh",
+  },
+  Uttarakhand: {
+    name: "Uttarakhand",
+    region: "north",
+    regionLabel: "North India",
+    desc: "Uses Nali, Mutthi, Bigha (hill areas use Nali system)",
+    units: [
+      {key:"nali",   label:"Nali",   local:"नाली",   sqft:2160},
+      {key:"mutthi", label:"Mutthi", local:"मुट्ठी",  sqft:270},
+      {key:"bigha",  label:"Bigha",  local:"बीघा",   sqft:27225},
+      {key:"kanal",  label:"Kanal",  local:"कनाल",   sqft:5445},
+      {key:"acre",   label:"Acre",   local:"एकड़",   sqft:43560},
+    ],
+    refNote:"Uttarakhand hill areas use Nali (1 Nali = 8 Mutthi). Plains use UP-style Bigha.",
+    fee:{
+      rural:     {residential:7,  commercial:28,  industrial:18,  agricultural:0},
+      municipal: {residential:15, commercial:60,  industrial:38,  agricultural:0},
+      metro:     {residential:28, commercial:108, industrial:72,  agricultural:0},
+    },
+    feeUnit:"nali", feeLabel:"per Nali",
+    portal:"Devbhoomi Uttarakhand",
+  },
+  JK: {
+    name: "J&K / Ladakh",
+    region: "north",
+    regionLabel: "North India",
+    desc: "Uses Kanal, Marla system",
+    units: [
+      {key:"kanal", label:"Kanal", local:"کنال",   sqft:5445},
+      {key:"marla", label:"Marla", local:"مرلہ",   sqft:272.25},
+      {key:"acre",  label:"Acre",  local:"ایکڑ",   sqft:43560},
+    ],
+    refNote:"J&K uses Kashmir valley standard: 1 Kanal = 20 Marla. 1 Acre = 8 Kanal.",
+    fee:{
+      rural:     {residential:7,  commercial:26,  industrial:17,  agricultural:0},
+      municipal: {residential:15, commercial:58,  industrial:36,  agricultural:0},
+      metro:     {residential:28, commercial:105, industrial:70,  agricultural:0},
+    },
+    feeUnit:"marla", feeLabel:"per Marla",
+    portal:"JK Land Records",
+  },
+  Delhi: {
+    name: "Delhi (NCT)",
+    region: "north",
+    regionLabel: "North India",
+    desc: "Uses Bigha, Biswa, Gaj / Sq. Yard system",
+    units: [
+      {key:"bigha",  label:"Bigha",        local:"बीघा",  sqft:27225},
+      {key:"biswa",  label:"Biswa",        local:"बिस्वा", sqft:1361.25},
+      {key:"sqyd",   label:"Gaj / Sq.Yard",local:"गज",    sqft:9},
+      {key:"acre",   label:"Acre",         local:"एकड़",  sqft:43560},
+    ],
+    refNote:"Delhi uses UP Pucca Bigha standard. Urban plots commonly in Sq. Yard / Gaj.",
+    fee:{
+      rural:     {residential:15, commercial:60,  industrial:40,  agricultural:0},
+      municipal: {residential:35, commercial:130, industrial:88,  agricultural:0},
+      metro:     {residential:70, commercial:250, industrial:170, agricultural:0},
+    },
+    feeUnit:"sqyd", feeLabel:"per Sq. Yard",
+    portal:"Delhi Land Records",
+  },
+  TN: {
+    name: "Tamil Nadu",
+    region: "south",
+    regionLabel: "South India",
+    desc: "Uses Cent, Ground, Kuzhi, Acre system",
+    units: [
+      {key:"cent",   label:"Cent",       local:"சென்ட்",   sqft:435.6},
+      {key:"ground", label:"Ground",     local:"கிரவுண்ட்", sqft:2400},
+      {key:"kuzhi",  label:"Kuzhi",      local:"குழி",     sqft:144},
+      {key:"kaani",  label:"Kaani",      local:"காணி",     sqft:57600},
+      {key:"acre",   label:"Acre",       local:"ஏக்கர்",   sqft:43560},
+    ],
+    refNote:"TN: 1 Acre = 100 Cent. 1 Kaani = 1.32 Acre = 132 Cent. 1 Ground = 5.5 Cent.",
+    fee:{
+      rural:     {residential:8,  commercial:32,  industrial:22,  agricultural:0},
+      municipal: {residential:18, commercial:72,  industrial:46,  agricultural:0},
+      metro:     {residential:38, commercial:145, industrial:98,  agricultural:0},
+    },
+    feeUnit:"cent", feeLabel:"per Cent",
+    portal:"Tamil Nadu TNREGINET",
+  },
+  Kerala: {
+    name: "Kerala",
+    region: "south",
+    regionLabel: "South India",
+    desc: "Uses Cent, Are, Acre system",
+    units: [
+      {key:"cent",    label:"Cent",      local:"സെൻ്റ്",  sqft:435.6},
+      {key:"are",     label:"Are",       local:"ആർ",     sqft:1076.39},
+      {key:"acre",    label:"Acre",      local:"ഏക്കർ",  sqft:43560},
+      {key:"sqlink",  label:"Sq. Link",  local:"Sq Link", sqft:0.4347},
+    ],
+    refNote:"Kerala: 1 Acre = 100 Cent. 1 Are = 100 Sq. Metres. Sq. Link rarely used in modern records.",
+    fee:{
+      rural:     {residential:10, commercial:38,  industrial:26,  agricultural:0},
+      municipal: {residential:22, commercial:82,  industrial:54,  agricultural:0},
+      metro:     {residential:45, commercial:165, industrial:110, agricultural:0},
+    },
+    feeUnit:"cent", feeLabel:"per Cent",
+    portal:"Kerala E-Records",
+  },
+  Karnataka: {
+    name: "Karnataka",
+    region: "south",
+    regionLabel: "South India",
+    desc: "Uses Guntha, Cent, Acre system",
+    units: [
+      {key:"guntha",  label:"Guntha / Gunta", local:"ಗುಂಟೆ",  sqft:1089},
+      {key:"cent",    label:"Cent",           local:"ಸೆಂಟ್",  sqft:435.6},
+      {key:"acre",    label:"Acre",           local:"ಎಕರೆ",   sqft:43560},
+      {key:"ankanam", label:"Ankanam",        local:"ಅಂಕಣಂ",  sqft:72},
+    ],
+    refNote:"Karnataka: 1 Acre = 40 Guntha. Ankanam used mainly in old records.",
+    fee:{
+      rural:     {residential:10, commercial:40,  industrial:28,  agricultural:0},
+      municipal: {residential:22, commercial:85,  industrial:56,  agricultural:0},
+      metro:     {residential:45, commercial:170, industrial:115, agricultural:0},
+    },
+    feeUnit:"guntha", feeLabel:"per Guntha",
+    portal:"Bhoomi Karnataka",
+  },
+  AP: {
+    name: "Andhra Pradesh",
+    region: "south",
+    regionLabel: "South India",
+    desc: "Uses Cent, Guntha, Ankanam, Kuncham system",
+    units: [
+      {key:"cent",    label:"Cent",    local:"సెంట్",   sqft:435.6},
+      {key:"guntha",  label:"Guntha",  local:"గుంట",    sqft:1089},
+      {key:"ankanam", label:"Ankanam", local:"అంకణం",   sqft:72},
+      {key:"kuncham", label:"Kuncham", local:"కుంచెం",  sqft:4356},
+      {key:"acre",    label:"Acre",    local:"ఎకరం",    sqft:43560},
+    ],
+    refNote:"AP: 1 Kuncham = 10 Cent. 1 Acre = 40 Guntha = 100 Cent. Ankanam in old Godavari records.",
+    fee:{
+      rural:     {residential:10, commercial:40,  industrial:28,  agricultural:0},
+      municipal: {residential:22, commercial:85,  industrial:56,  agricultural:0},
+      metro:     {residential:45, commercial:170, industrial:115, agricultural:0},
+    },
+    feeUnit:"cent", feeLabel:"per Cent",
+    portal:"Mee Bhoomi AP",
+  },
+  Telangana: {
+    name: "Telangana",
+    region: "south",
+    regionLabel: "South India",
+    desc: "Uses Cent, Guntha, Ankanam, Gajam system",
+    units: [
+      {key:"cent",    label:"Cent",    local:"సెంట్",  sqft:435.6},
+      {key:"guntha",  label:"Guntha",  local:"గుంట",   sqft:1089},
+      {key:"gajam",   label:"Gajam",   local:"గజం",    sqft:9},
+      {key:"ankanam", label:"Ankanam", local:"అంకణం",  sqft:72},
+      {key:"acre",    label:"Acre",    local:"ఎకరం",   sqft:43560},
+    ],
+    refNote:"Telangana: 1 Acre = 40 Guntha = 100 Cent. Gajam = Sq. Yard, used in urban property records.",
+    fee:{
+      rural:     {residential:10, commercial:40,  industrial:28,  agricultural:0},
+      municipal: {residential:22, commercial:85,  industrial:56,  agricultural:0},
+      metro:     {residential:45, commercial:170, industrial:115, agricultural:0},
+    },
+    feeUnit:"cent", feeLabel:"per Cent",
+    portal:"Dharani Telangana",
+  },
+  Maharashtra: {
+    name: "Maharashtra",
+    region: "west",
+    regionLabel: "West India",
+    desc: "Uses Guntha, Acre, Hectare system",
+    units: [
+      {key:"guntha",  label:"Guntha",  local:"गुंठा",  sqft:1089},
+      {key:"bigha",   label:"Bigha",   local:"बिघा",   sqft:27225},
+      {key:"acre",    label:"Acre",    local:"एकर",    sqft:43560},
+      {key:"hectare", label:"Hectare", local:"हेक्टर", sqft:107639},
+    ],
+    refNote:"Maharashtra: 1 Acre = 40 Guntha. 1 Bigha = 25 Guntha. Satbara Utara (7/12 extract) is key land record.",
+    fee:{
+      rural:     {residential:10, commercial:40,  industrial:28,  agricultural:0},
+      municipal: {residential:24, commercial:92,  industrial:60,  agricultural:0},
+      metro:     {residential:50, commercial:190, industrial:128, agricultural:0},
+    },
+    feeUnit:"guntha", feeLabel:"per Guntha",
+    portal:"Mahabhulekh",
+  },
+  Gujarat: {
+    name: "Gujarat",
+    region: "west",
+    regionLabel: "West India",
+    desc: "Uses Vigha, Guntha, Acre system (North/South Gujarat differ)",
+    units: [
+      {key:"vigha",  label:"Vigha (N. Gujarat)", local:"વીઘા",  sqft:17424},
+      {key:"vigha_s",label:"Vigha (S. Gujarat)", local:"વીઘા",  sqft:14400},
+      {key:"guntha", label:"Guntha",             local:"ગુંઠા",  sqft:1089},
+      {key:"acre",   label:"Acre",               local:"એકર",   sqft:43560},
+    ],
+    refNote:"Gujarat Vigha varies: N. Gujarat = 17,424 sq ft (0.4 acre); S. Gujarat / Saurashtra = 14,400 sq ft (0.33 acre).",
+    fee:{
+      rural:     {residential:10, commercial:40,  industrial:28,  agricultural:0},
+      municipal: {residential:24, commercial:92,  industrial:60,  agricultural:0},
+      metro:     {residential:48, commercial:185, industrial:125, agricultural:0},
+    },
+    feeUnit:"guntha", feeLabel:"per Guntha",
+    portal:"AnyROR Gujarat",
+  },
+  Goa: {
+    name: "Goa",
+    region: "west",
+    regionLabel: "West India",
+    desc: "Uses Sq. Metre, Sq. Feet, Guntha system",
+    units: [
+      {key:"guntha", label:"Guntha", local:"Guntha", sqft:1089},
+      {key:"sqm",    label:"Sq. Metre", local:"Sq M", sqft:10.7639},
+      {key:"acre",   label:"Acre",   local:"Acre",   sqft:43560},
+    ],
+    refNote:"Goa: 1 Acre = 40 Guntha. Form I&XIV is the key land record in Goa.",
+    fee:{
+      rural:     {residential:12, commercial:45,  industrial:32,  agricultural:0},
+      municipal: {residential:28, commercial:105, industrial:70,  agricultural:0},
+      metro:     {residential:55, commercial:210, industrial:140, agricultural:0},
+    },
+    feeUnit:"guntha", feeLabel:"per Guntha",
+    portal:"Goa Land Records",
+  },
+  MP: {
+    name: "Madhya Pradesh",
+    region: "central",
+    regionLabel: "Central India",
+    desc: "Uses Bigha, Biswa, Hectare system",
+    units: [
+      {key:"bigha",   label:"Bigha",   local:"बीघा",   sqft:12000},
+      {key:"biswa",   label:"Biswa",   local:"बिस्वा",  sqft:600},
+      {key:"katha",   label:"Katha",   local:"कट्ठा",  sqft:600},
+      {key:"acre",    label:"Acre",    local:"एकड़",   sqft:43560},
+      {key:"hectare", label:"Hectare", local:"हेक्टेयर",sqft:107639},
+    ],
+    refNote:"MP Bigha = 12,000 sq ft (smaller than UP/Bihar). 1 Bigha = 20 Biswa. Bhulekh MP is the land record portal.",
+    fee:{
+      rural:     {residential:8,  commercial:30,  industrial:20,  agricultural:0},
+      municipal: {residential:18, commercial:68,  industrial:44,  agricultural:0},
+      metro:     {residential:36, commercial:135, industrial:90,  agricultural:0},
+    },
+    feeUnit:"biswa", feeLabel:"per Biswa",
+    portal:"Bhulekh MP",
+  },
+  CG: {
+    name: "Chhattisgarh",
+    region: "central",
+    regionLabel: "Central India",
+    desc: "Uses Bigha, Decimals, Hectare system",
+    units: [
+      {key:"bigha",   label:"Bigha",   local:"बीघा",    sqft:12000},
+      {key:"decimal", label:"Decimal", local:"डेसिमल",  sqft:435.6},
+      {key:"acre",    label:"Acre",    local:"एकड़",    sqft:43560},
+      {key:"hectare", label:"Hectare", local:"हेक्टेयर", sqft:107639},
+    ],
+    refNote:"CG uses MP-style Bigha = 12,000 sq ft. 2.47 Acre = 1 Hectare. Bhuiyan portal for land records.",
+    fee:{
+      rural:     {residential:7,  commercial:26,  industrial:18,  agricultural:0},
+      municipal: {residential:16, commercial:62,  industrial:40,  agricultural:0},
+      metro:     {residential:30, commercial:115, industrial:78,  agricultural:0},
+    },
+    feeUnit:"decimal", feeLabel:"per Decimal",
+    portal:"Bhuiyan CG",
+  },
+  Chandigarh: {
+    name: "Chandigarh (UT)",
+    region: "north",
+    regionLabel: "North India",
+    desc: "Uses Kanal, Marla, Sq. Yard system",
+    units: [
+      {key:"kanal", label:"Kanal", local:"ਕਨਾਲ",  sqft:5445},
+      {key:"marla", label:"Marla", local:"ਮਰਲਾ",  sqft:272.25},
+      {key:"sqyd",  label:"Sq. Yard", local:"Gaj",sqft:9},
+      {key:"acre",  label:"Acre",  local:"ਏਕੜ",   sqft:43560},
+    ],
+    refNote:"Chandigarh follows Punjab standards: 1 Kanal = 20 Marla. Urban plots in Sq. Yard.",
+    fee:{
+      rural:     {residential:15, commercial:60,  industrial:40,  agricultural:0},
+      municipal: {residential:35, commercial:130, industrial:88,  agricultural:0},
+      metro:     {residential:65, commercial:240, industrial:162, agricultural:0},
+    },
+    feeUnit:"marla", feeLabel:"per Marla",
+    portal:"Chandigarh Revenue",
+  },
+  Puducherry: {
+    name: "Puducherry (UT)",
+    region: "south",
+    regionLabel: "South India",
+    desc: "Uses Cent, Acre (Tamil Nadu system)",
+    units: [
+      {key:"cent", label:"Cent", local:"Cent",   sqft:435.6},
+      {key:"acre", label:"Acre", local:"Acre",   sqft:43560},
+    ],
+    refNote:"Puducherry follows Tamil Nadu conventions. 1 Acre = 100 Cent.",
+    fee:{
+      rural:     {residential:10, commercial:38,  industrial:26,  agricultural:0},
+      municipal: {residential:22, commercial:84,  industrial:56,  agricultural:0},
+      metro:     {residential:40, commercial:155, industrial:105, agricultural:0},
+    },
+    feeUnit:"cent", feeLabel:"per Cent",
+    portal:"Puducherry Revenue",
+  },
+};
+
+// ─── UNIVERSAL CONVERSIONS ────────────────────────────────────────────────────
+const SQ_M_PER_SQFT = 0.09290304;
+const SQFT_PER_ACRE = 43560;
+const SQFT_PER_HECTARE = 107639.104;
+const SQFT_PER_GAJ = 9;
+
+let currentState = null;
+let currentSqft = 0;
+
+function fmt(n, dp) {
+  if (n === 0) return "0";
+  if (!isFinite(n)) return "—";
+  if (n > 0 && n < 0.00001) return n.toExponential(2);
+  return parseFloat(n.toFixed(dp)).toLocaleString("en-IN");
+}
+
+function precision(n) {
+  if (n >= 1000) return 2;
+  if (n >= 100)  return 2;
+  if (n >= 10)   return 3;
+  if (n >= 1)    return 4;
+  if (n >= 0.01) return 5;
+  return 6;
+}
+
+function onStateChange() {
+  const key = document.getElementById("stateSelect").value;
+  if (!key) { currentState = null; resetUI(); return; }
+  currentState = STATES[key];
+  populateStateUI();
+  calculateAll();
+}
+
+function resetUI() {
+  document.getElementById("hdr-state").textContent = "Select a state";
+  document.getElementById("hdr-region").textContent = "—";
+  document.getElementById("inputUnit").innerHTML = '<option value="">Select state first</option>';
+  document.getElementById("unitsStrip").style.display = "none";
+  document.getElementById("localUnitsSection").style.display = "none";
+  document.getElementById("refTableBody").innerHTML = '<tr><td colspan="4" style="color:var(--gray-400);font-size:12px;padding:12px 0;">Select a state to see local unit reference.</td></tr>';
+  document.getElementById("stateNote").style.display = "flex";
+  document.getElementById("stateNote").querySelector("span").textContent = "Select a state above to load accurate local unit values.";
+  document.getElementById("refTableTitle").textContent = "Unit reference table";
+  document.getElementById("feeDisplay").textContent = "₹ —";
+  document.getElementById("rateInfo").textContent = "Select a state to see rates";
+  document.getElementById("feeNote").textContent = "";
+  document.getElementById("regionTag").style.display = "none";
+  document.getElementById("stateDesc").textContent = "";
+  ["r-sqft","r-sqm","r-acre","r-hectare","r-gaj"].forEach(id => {
+    document.getElementById(id).textContent = "—";
+  });
+}
+
+function populateStateUI() {
+  const s = currentState;
+  // Header
+  document.getElementById("hdr-state").textContent = s.name;
+  document.getElementById("hdr-region").textContent = s.regionLabel;
+
+  // Region tag
+  const tag = document.getElementById("regionTag");
+  tag.className = "region-pill region-" + s.region;
+  tag.textContent = s.regionLabel;
+  tag.style.display = "inline-block";
+  document.getElementById("stateDesc").textContent = s.desc;
+
+  // Populate unit dropdown
+  const sel = document.getElementById("inputUnit");
+  sel.innerHTML = s.units.map((u,i) =>
+    `<option value="${u.key}"${i===0?" selected":""}>${u.label}${u.local ? " ("+u.local+")" : ""}</option>`
+  ).join("");
+
+  // Units strip
+  const strip = document.getElementById("unitsStrip");
+  strip.style.display = "flex";
+  document.getElementById("unitsStripText").innerHTML = `<strong>${s.name}</strong>: ${s.refNote}`;
+
+  // Reference table
+  document.getElementById("refTableTitle").textContent = s.name + " unit reference";
+  const tbody = document.getElementById("refTableBody");
+  tbody.innerHTML = s.units.map(u => `
+    <tr data-ukey="${u.key}">
+      <td class="u-name">${u.label}</td>
+      <td>${u.sqft.toLocaleString("en-IN")}</td>
+      <td>${fmt(u.sqft * SQ_M_PER_SQFT, 2)}</td>
+      <td>${fmt(u.sqft / SQFT_PER_ACRE, 6)}</td>
+    </tr>`).join("");
+  document.getElementById("stateNote").style.display = "none";
+
+  // Local results grid
+  buildLocalGrid();
+}
+
+function buildLocalGrid() {
+  const s = currentState;
+  const grid = document.getElementById("localResultsGrid");
+  // Build a card per local unit (will be filled by calculateAll)
+  grid.innerHTML = s.units.map(u => `
+    <div class="metric-card" id="lcard-${u.key}">
+      <div class="m-unit">${u.label}</div>
+      <div class="m-value" id="lval-${u.key}">—</div>
+      <div class="m-sub">${u.local || ""}</div>
+    </div>`).join("");
+  document.getElementById("localUnitsSection").style.display = "block";
+}
+
+function getSqftFromInput() {
+  const key = document.getElementById("inputUnit").value;
+  const val = parseFloat(document.getElementById("inputValue").value);
+  if (!currentState || !key || isNaN(val) || val < 0) return null;
+  const unit = currentState.units.find(u => u.key === key);
+  if (!unit) return null;
+  return val * unit.sqft;
+}
+
+function fromSqft() {
+  const v = parseFloat(document.getElementById("sqftInput").value);
+  if (isNaN(v) || v < 0) return;
+  // Derive inputValue from sqftInput based on selected unit
+  const key = document.getElementById("inputUnit").value;
+  if (!currentState || !key) return;
+  const unit = currentState.units.find(u => u.key === key);
+  if (!unit) return;
+  document.getElementById("inputValue").value = parseFloat((v / unit.sqft).toFixed(6));
+  calculateAll(true);
+}
+
+function calculateAll(fromSqftBox) {
+  if (!currentState) return;
+  const sqft = getSqftFromInput();
+
+  if (sqft === null || !isFinite(sqft)) {
+    ["r-sqft","r-sqm","r-acre","r-hectare","r-gaj"].forEach(id => {
+      document.getElementById(id).textContent = "—";
+    });
+    document.getElementById("feeDisplay").textContent = "₹ —";
+    document.getElementById("rateInfo").textContent = "Enter a valid area value.";
+    return;
+  }
+
+  currentSqft = sqft;
+  if (!fromSqftBox) document.getElementById("sqftInput").value = "";
+
+  // Universal results
+  const sqm      = sqft * SQ_M_PER_SQFT;
+  const acres    = sqft / SQFT_PER_ACRE;
+  const hectares = sqft / SQFT_PER_HECTARE;
+  const gaj      = sqft / SQFT_PER_GAJ;
+
+  document.getElementById("r-sqft").textContent    = Math.round(sqft).toLocaleString("en-IN");
+  document.getElementById("r-sqm").textContent     = fmt(sqm, precision(sqm));
+  document.getElementById("r-acre").textContent    = fmt(acres, precision(acres));
+  document.getElementById("r-hectare").textContent = fmt(hectares, precision(hectares));
+  document.getElementById("r-gaj").textContent     = fmt(gaj, precision(gaj));
+
+  // Flash cards
+  ["card-sqft","card-sqm","card-acre","card-hectare","card-gaj"].forEach(id => flash(id));
+
+  // Local unit results
+  currentState.units.forEach(u => {
+    const val = sqft / u.sqft;
+    const el = document.getElementById("lval-" + u.key);
+    if (el) {
+      el.textContent = fmt(val, precision(val));
+      flash("lcard-" + u.key);
+    }
+  });
+
+  // Highlight ref table row
+  const selKey = document.getElementById("inputUnit").value;
+  document.querySelectorAll("#refTableBody tr").forEach(r => {
+    r.classList.toggle("active-row", r.dataset.ukey === selKey);
+  });
+
+  // Fee calculation
+  calcFee(sqft);
+}
+
+function calcFee(sqft) {
+  const s = currentState;
+  const zone = document.getElementById("zoneType").value;
+  const conv = document.getElementById("convType").value;
+
+  if (conv === "agricultural") {
+    document.getElementById("feeDisplay").textContent = "₹ 0.00";
+    document.getElementById("rateInfo").textContent = "No conversion fee for self-use agricultural purposes.";
+    document.getElementById("feeNote").textContent = "";
+    return;
+  }
+
+  const feeMatrix = s.fee[zone];
+  const ratePerUnit = feeMatrix[conv];
+
+  // Convert sqft to the fee unit of this state
+  const feeUnitKey = s.feeUnit;
+  const feeUnitDef = s.units.find(u => u.key === feeUnitKey);
+  let unitsCount = 1;
+  if (feeUnitDef) {
+    unitsCount = sqft / feeUnitDef.sqft;
+  } else {
+    // fallback: if feeUnit is acre
+    if (feeUnitKey === "acre") unitsCount = sqft / SQFT_PER_ACRE;
+    else if (feeUnitKey === "sqyd") unitsCount = sqft / 9;
+    else if (feeUnitKey === "hectare") unitsCount = sqft / SQFT_PER_HECTARE;
+  }
+
+  const totalFee = unitsCount * ratePerUnit;
+
+  document.getElementById("feeDisplay").textContent = "₹ " + totalFee.toLocaleString("en-IN", {
+    minimumFractionDigits: 2, maximumFractionDigits: 2
+  });
+
+  const zoneLabels = {rural:"Rural / Panchayat", municipal:"Municipal / ULB", metro:"Metro / Dev. Authority"};
+  const convLabels = {residential:"Residential", commercial:"Commercial", industrial:"Industrial"};
+
+  document.getElementById("rateInfo").textContent =
+    `₹${ratePerUnit} ${s.feeLabel} · ${zoneLabels[zone]} · ${convLabels[conv]}`;
+  document.getElementById("feeNote").textContent =
+    `Official portal: ${s.portal}`;
+}
+
+function flash(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.classList.remove("updated");
+  void el.offsetWidth;
+  el.classList.add("updated");
+  setTimeout(() => el.classList.remove("updated"), 350);
+}
+
+// ─── init ────────────────────────────────────────────────────────────────────
+// Pre-select West Bengal since this is a WB-origin tool
+window.onload = () => {
+  document.getElementById("stateSelect").value = "WB";
+  onStateChange();
+};
+</script>
+</body>
+</html>
